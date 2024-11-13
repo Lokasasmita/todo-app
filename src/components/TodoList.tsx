@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import TodoItem from "./TodoItem";
 import { Button } from "./Button";
 import useLocalStorageState from "./useLocalStorageState"; // Import custom hook
@@ -12,11 +12,15 @@ interface Task {
 const TodoList: React.FC = () => {
   const [tasks, setTasks] = useLocalStorageState<Task[]>("tasks", []);
   const [newTask, setNewTask] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleAddTask = () => {
     if (newTask.trim() === "") return;
     setTasks([...tasks, { id: Date.now(), title: newTask, isEditing: false }]);
     setNewTask("");
+
+    // Focus the input after adding a task
+    inputRef.current?.focus();
   };
 
   const handleDeleteTask = (id: number) => {
@@ -39,13 +43,21 @@ const TodoList: React.FC = () => {
     );
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleAddTask();
+    }
+  };
+
   return (
     <div className="max-w-lg mx-auto bg-white p-4 sm:p-6 md:p-8 rounded-md shadow-md">
       <div className="flex flex-col md:flex-row items-center mb-4 gap-2">
         <input
+          ref={inputRef}
           className="w-full md:flex-1 border p-2 rounded"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
+          onKeyDown={handleKeyDown} // trigger handleAddTask on Enter key
           placeholder="New Task"
         />
         <Button
