@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "./Button";
+import { useTasks } from "./TaskContext";
 
 interface Task {
   id: number;
@@ -9,24 +10,14 @@ interface Task {
 
 interface TodoItemProps {
   task: Task;
-  title: string;
-  onDelete: () => void;
-  onEdit: (title: string) => void;
-  toggleEdit: () => void;
 }
 
-const TodoItem: React.FC<TodoItemProps> = ({
-  task,
-  title,
-  onDelete,
-  onEdit,
-  toggleEdit,
-}) => {
+const TodoItem: React.FC<TodoItemProps> = ({ task }) => {
+  const { deleteTask, editTask, toggleEdit } = useTasks(); // Access context
   const [editTitle, setEditTitle] = useState(task.title);
-  console.log(title);
 
   const handleSave = () => {
-    onEdit(editTitle); // Call onEdit with the updated title
+    editTask(task.id, editTitle);
   };
 
   return (
@@ -47,14 +38,12 @@ const TodoItem: React.FC<TodoItemProps> = ({
         </>
       ) : (
         <>
-          {/* Ensure text wraps if it’s too long */}
           <span className="flex-1 break-words whitespace-normal">
             {task.title}
           </span>
           <div className="flex gap-2 mt-2 sm:mt-0">
-            {/* Flex with gap to ensure buttons are horizontally aligned with spacing */}
-            <Button onClick={toggleEdit}>Edit</Button>
-            <Button onClick={onDelete}>Delete</Button>
+            <Button onClick={() => toggleEdit(task.id)}>Edit</Button>
+            <Button onClick={() => deleteTask(task.id)}>Delete</Button>
           </div>
         </>
       )}
